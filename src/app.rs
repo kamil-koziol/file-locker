@@ -7,6 +7,10 @@ pub struct TemplateApp {
 
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
+
+    picked_path: Option<String>,
+    files: Vec<String>,
+    file_to_remove: Option<String>,
 }
 
 impl Default for TemplateApp {
@@ -15,6 +19,9 @@ impl Default for TemplateApp {
             // Example stuff:
             label: "Hello World!".to_owned(),
             value: 2.7,
+            picked_path: None,
+            files: Vec::new(),
+            file_to_remove: None,
         }
     }
 }
@@ -74,6 +81,43 @@ impl eframe::App for TemplateApp {
                 ui.text_edit_singleline(&mut self.label);
             });
 
+            if ui.button("Open file…").clicked() {
+                if let Some(path) = rfd::FileDialog::new().pick_file() {
+                    let result = Some(path.display().to_string());
+                    self.picked_path = result.clone();
+                    if !self.files.contains(result.as_ref().unwrap()) {
+                        self.files.push(result.unwrap());
+                    }
+                }
+            }
+
+            // scrollable
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for file in &self.files {
+                    ui.button(file.clone()).context_menu(|ui| {
+                        if ui.button("Remove").clicked() {
+                            self.file_to_remove = Some(file.clone());
+                        }
+                    });
+                }
+            });
+
+            // modal on click
+            if ui.button("Modal").clicked() {
+                egui::Window::new("Modal").show(&ui.ctx(), |ui| {
+                    ui.label("This is a modal window");
+                    if ui.button("Close").clicked() {
+                        // ui.ctx().close_window();
+                    }
+                });
+            }
+
+            // clearing file to remove
+            if let Some(file_to_remove) = &self.file_to_remove {
+                self.files.retain(|file| file != file_to_remove);
+                self.file_to_remove = None;
+            }
+
             ui.add(egui::Slider::new(&mut self.value, 0.0..=10.0).text("value"));
             if ui.button("Increment").clicked() {
                 self.value += 1.0;
@@ -86,6 +130,7 @@ impl eframe::App for TemplateApp {
                 "Source code."
             ));
 
+            powered_by_egui_and_eframe(ui);
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);
                 egui::warn_if_debug_build(ui);
