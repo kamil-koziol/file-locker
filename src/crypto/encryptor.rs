@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_variables)]
+
 use aes_gcm::{
     aead::{generic_array::GenericArray, Aead, AeadCore, KeyInit, Nonce},
     Aes256Gcm,
@@ -5,7 +7,6 @@ use aes_gcm::{
 };
 
 use rand::rngs::OsRng;
-use std::error::Error;
 
 pub struct Encryptor {}
 
@@ -34,7 +35,7 @@ impl Encryptor {
 
     pub fn load_nonce(data: &[u8]) -> Nonce<Aes256Gcm> {
         let mut nonce = GenericArray::default();
-        nonce.copy_from_slice(&data);
+        nonce.copy_from_slice(data);
         nonce
     }
 }

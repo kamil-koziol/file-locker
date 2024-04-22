@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_variables)]
+
 use crate::crypto::Encryptor;
 use rand::rngs::OsRng;
 use rsa::pkcs1::{

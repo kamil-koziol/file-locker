@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_variables)]
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -74,19 +76,19 @@ impl eframe::App for TemplateApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("eframe template");
+            ui.heading("File Locker");
 
             ui.horizontal(|ui| {
-                ui.label("Write something: ");
+                ui.label("Selected file: ");
                 ui.text_edit_singleline(&mut self.label);
             });
 
             if ui.button("Open file…").clicked() {
                 if let Some(path) = rfd::FileDialog::new().pick_file() {
-                    let result = Some(path.display().to_string());
-                    self.picked_path = result.clone();
-                    if !self.files.contains(result.as_ref().unwrap()) {
-                        self.files.push(result.unwrap());
+                    let result = path.display().to_string();
+                    self.picked_path = Some(result.clone());
+                    if !self.files.contains(&result) {
+                        self.files.push(result);
                     }
                 }
             }
@@ -103,52 +105,20 @@ impl eframe::App for TemplateApp {
             });
 
             // modal on click
-            if ui.button("Modal").clicked() {
-                egui::Window::new("Modal").show(&ui.ctx(), |ui| {
-                    ui.label("This is a modal window");
-                    if ui.button("Close").clicked() {
-                        // ui.ctx().close_window();
-                    }
-                });
-            }
+            // if ui.button("Modal").clicked() {
+            //     egui::Window::new("Modal").show(&ui.ctx(), |ui| {
+            //         ui.label("This is a modal window");
+            //         if ui.button("Close").clicked() {
+            //             // ui.ctx().close_window();
+            //         }
+            //     });
+            // }
 
             // clearing file to remove
             if let Some(file_to_remove) = &self.file_to_remove {
                 self.files.retain(|file| file != file_to_remove);
                 self.file_to_remove = None;
             }
-
-            ui.add(egui::Slider::new(&mut self.value, 0.0..=10.0).text("value"));
-            if ui.button("Increment").clicked() {
-                self.value += 1.0;
-            }
-
-            ui.separator();
-
-            ui.add(egui::github_link_file!(
-                "https://github.com/emilk/eframe_template/blob/master/",
-                "Source code."
-            ));
-
-            powered_by_egui_and_eframe(ui);
-            ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                powered_by_egui_and_eframe(ui);
-                egui::warn_if_debug_build(ui);
-            });
         });
     }
-}
-
-fn powered_by_egui_and_eframe(ui: &mut egui::Ui) {
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = 0.0;
-        ui.label("Powered by ");
-        ui.hyperlink_to("egui", "https://github.com/emilk/egui");
-        ui.label(" and ");
-        ui.hyperlink_to(
-            "eframe",
-            "https://github.com/emilk/egui/tree/master/crates/eframe",
-        );
-        ui.label(".");
-    });
 }

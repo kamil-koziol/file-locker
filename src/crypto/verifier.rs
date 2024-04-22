@@ -1,13 +1,10 @@
-use rand::rngs::OsRng;
-use rsa::{RsaPrivateKey, RsaPublicKey};
+#![allow(dead_code, unused_variables)]
 
-use rsa::pkcs1v15::{Signature, SigningKey, VerifyingKey};
+use rsa::RsaPublicKey;
+
+use rsa::pkcs1v15::{Signature, VerifyingKey};
 
 use rsa::sha2::{Digest, Sha256};
-use rsa::signature::RandomizedSigner;
-use std::error::Error;
-
-use crate::crypto::Keypair;
 
 pub struct Verifier {
     rsa_public_key: RsaPublicKey,

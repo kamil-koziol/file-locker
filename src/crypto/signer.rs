@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_variables)]
+
 use rand::rngs::OsRng;
 use rsa::RsaPrivateKey;
 
@@ -6,8 +8,6 @@ use rsa::pkcs1v15::{Signature, SigningKey};
 use rsa::sha2::{Digest, Sha256};
 use rsa::signature::RandomizedSigner;
 use std::error::Error;
-
-use crate::crypto::Keypair;
 
 pub struct Signer {
     rsa_private_key: RsaPrivateKey,
@@ -38,6 +38,8 @@ impl Signer {
 mod tests {
 
     use std::fs;
+
+    use crate::crypto::Keypair;
 
     use super::*;
 
