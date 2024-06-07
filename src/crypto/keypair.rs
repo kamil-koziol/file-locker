@@ -116,9 +116,13 @@ mod tests {
         let private_key_path = "keys/private.pem";
         let public_key_path = "keys/public.pem";
 
+        let _ = fs::create_dir("keys");
         keypair
             .write_to_files(private_key_path, public_key_path, "1234")
             .unwrap();
+
+        // Cleanup
+        let _ = fs::remove_dir_all("keys");
     }
 
     #[test]
@@ -129,6 +133,7 @@ mod tests {
         let private_key_path = "keys/private.pem";
         let public_key_path = "keys/public.pem";
 
+        let _ = fs::create_dir("keys");
         keypair
             .write_to_files(private_key_path, public_key_path, pin)
             .unwrap();
@@ -138,5 +143,8 @@ mod tests {
 
         assert_eq!(keypair.private_key, private_key);
         assert_eq!(keypair.public_key, public_key);
+
+        // Cleanup
+        let _ = fs::remove_dir_all("keys");
     }
 }
