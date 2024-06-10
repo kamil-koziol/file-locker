@@ -17,12 +17,16 @@ eframe = { version = "0.26.0", default-features = false, features = [
 log = "0.4"
 
 # You only need serde if you want app persistence:
+serde-xml-rs = "0.6"
+base64 = "0.13"
+
 serde = { version = "1", features = ["derive"] }
 rfd = "0.14.0"
 aes-gcm = "0.10.3"
 rsa = { version = "0.9.6", features = ["sha2"] }
 rand = "0.8.5"
 chrono = { version = "0.4.38", features = ["serde"] }
+uuid = { version = "1.8.0", features = ["v4"]}
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
