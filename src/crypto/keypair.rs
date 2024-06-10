@@ -8,6 +8,7 @@ use rsa::pkcs1::{
 use rsa::pkcs8::LineEnding;
 use rsa::sha2::{Digest, Sha256};
 use rsa::{RsaPrivateKey, RsaPublicKey};
+use std::path::Path;
 use std::{error::Error, fs};
 
 use super::encryptor::EncryptResult;
@@ -20,6 +21,9 @@ pub struct Keypair {
     pub private_key: RsaPrivateKey,
     pub public_key: RsaPublicKey,
 }
+
+const PRIVATE_KEY_NAME: &str = "private.pem";
+const PUBLIC_KEY_NAME: &str = "public.pem";
 
 impl Keypair {
     pub fn encrypt_private_key(
@@ -73,6 +77,28 @@ impl Keypair {
             .write_pkcs1_pem_file(public_key_path, LineEnding::default())?;
 
         Ok(())
+    }
+
+    pub fn write_to_dir(&self, dir: &str, pin: &str) -> Result<(), Box<dyn Error>> {
+        let private_key_path = Path::new(dir).join(PRIVATE_KEY_NAME);
+        let public_key_path = Path::new(dir).join(PUBLIC_KEY_NAME);
+
+        self.write_to_files(
+            private_key_path.to_str().unwrap(),
+            public_key_path.to_str().unwrap(),
+            pin,
+        )
+    }
+
+    pub fn load_from_dir(dir: &str, pin: &str) -> Result<Keypair, Box<dyn Error>> {
+        let private_key_path = Path::new(dir).join(PRIVATE_KEY_NAME);
+        let public_key_path = Path::new(dir).join(PUBLIC_KEY_NAME);
+        let private_key = Keypair::load_private_from_file(private_key_path.to_str().unwrap(), pin)?;
+        let public_key = Keypair::load_public_from_file(public_key_path.to_str().unwrap())?;
+        Ok(Self {
+            private_key,
+            public_key,
+        })
     }
 
     pub fn generate(bits: usize) -> Self {

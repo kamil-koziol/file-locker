@@ -1,29 +1,33 @@
 #![allow(dead_code, unused_variables)]
 
+use crate::crypto::Keypair;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct TemplateApp {
-    // Example stuff:
-    label: String,
-
-    #[serde(skip)] // This how you opt-out of serialization of a field
-    value: f32,
-
-    picked_path: Option<String>,
     files: Vec<String>,
     file_to_remove: Option<String>,
+
+    #[serde(skip)]
+    keypair: Option<Keypair>,
+
+    keypair_path: Option<String>,
+    pin: Option<String>,
+
+    #[serde(skip)]
+    pin_textfield: String,
 }
 
 impl Default for TemplateApp {
     fn default() -> Self {
         Self {
-            // Example stuff:
-            label: "Hello World!".to_owned(),
-            value: 2.7,
-            picked_path: None,
             files: Vec::new(),
             file_to_remove: None,
+            keypair: None,
+            keypair_path: None,
+            pin: None,
+            pin_textfield: String::from(""),
         }
     }
 }
@@ -59,34 +63,64 @@ impl eframe::App for TemplateApp {
             // The top panel is often a good place for a menu bar:
 
             egui::menu::bar(ui, |ui| {
-                // NOTE: no File->Quit on web pages!
-                let is_web = cfg!(target_arch = "wasm32");
-                if !is_web {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Quit").clicked() {
-                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                        }
-                    });
-                    ui.add_space(16.0);
-                }
+                ui.menu_button("File", |ui| {
+                    if ui.button("Quit").clicked() {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    }
+                });
+
+                ui.add_space(16.0);
 
                 egui::widgets::global_dark_light_mode_buttons(ui);
             });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
             ui.heading("File Locker");
 
-            ui.horizontal(|ui| {
-                ui.label("Selected file: ");
-                ui.text_edit_singleline(&mut self.label);
-            });
+            if self.pin.is_none() {
+                ui.heading("Welcome, enter pin to continue");
+                ui.text_edit_singleline(&mut self.pin_textfield);
+                if ui.button("Enter").clicked() {
+                    self.pin = Some(self.pin_textfield.clone());
+                    // TODO: Hash
+                }
+                return;
+            }
 
-            if ui.button("Open file…").clicked() {
+            if self.keypair.is_none() {
+                ui.heading("Continue by generating or loading keypair");
+                if ui.button("Generate").clicked() {
+                    if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                        let result = path.display().to_string();
+
+                        let keypair = Keypair::generate(4096);
+                        keypair
+                            .write_to_dir(&result, &self.pin.clone().unwrap())
+                            .unwrap();
+
+                        self.keypair = Some(keypair);
+                        self.keypair_path = Some(result.clone());
+                    }
+                }
+
+                if ui.button("Load").clicked() {
+                    if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                        let result = path.display().to_string();
+                        self.keypair_path = Some(result.clone());
+
+                        match Keypair::load_from_dir(&result, &self.pin.clone().unwrap()) {
+                            Ok(kp) => self.keypair = Some(kp),
+                            Err(_) => println!("Invalid pin!"),
+                        }
+                    }
+                }
+                return;
+            }
+
+            if ui.button("Add file").clicked() {
                 if let Some(path) = rfd::FileDialog::new().pick_file() {
                     let result = path.display().to_string();
-                    self.picked_path = Some(result.clone());
                     if !self.files.contains(&result) {
                         self.files.push(result);
                     }
@@ -100,19 +134,13 @@ impl eframe::App for TemplateApp {
                         if ui.button("Remove").clicked() {
                             self.file_to_remove = Some(file.clone());
                         }
+
+                        if let Some(kp) = &self.keypair {
+                            if ui.button("Sign").clicked() {}
+                        }
                     });
                 }
             });
-
-            // modal on click
-            // if ui.button("Modal").clicked() {
-            //     egui::Window::new("Modal").show(&ui.ctx(), |ui| {
-            //         ui.label("This is a modal window");
-            //         if ui.button("Close").clicked() {
-            //             // ui.ctx().close_window();
-            //         }
-            //     });
-            // }
 
             // clearing file to remove
             if let Some(file_to_remove) = &self.file_to_remove {
