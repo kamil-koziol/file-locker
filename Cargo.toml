@@ -27,6 +27,8 @@ rsa = { version = "0.9.6", features = ["sha2"] }
 rand = "0.8.5"
 chrono = { version = "0.4.38", features = ["serde"] }
 uuid = { version = "1.8.0", features = ["v4"]}
+open = "5.1.4"
+sysinfo = "0.30.12"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

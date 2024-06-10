@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_xml_rs::{from_str, to_string};
-use std::error::Error;
+use std::{error::Error, fs, path::Path};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -44,6 +44,18 @@ impl XAdESSignature {
 
     pub fn serialize(&self) -> Result<String, Box<dyn Error>> {
         Ok(to_string(&self)?)
+    }
+
+    pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn Error>> {
+        let serialized = self.serialize()?;
+        fs::write(path.as_ref(), serialized)?;
+        Ok(())
+    }
+
+    pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+        let xml_signature = fs::read_to_string(path)?;
+        let xades_signature = XAdESSignature::deserialize(&xml_signature)?;
+        Ok(xades_signature)
     }
 
     pub fn deserialize(xml: &str) -> Result<Self, Box<dyn Error>> {

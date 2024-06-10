@@ -41,13 +41,10 @@ impl Verifier {
         file_path: P,
         signature_path: P,
     ) -> Result<bool, Box<dyn Error>> {
+        let xades_signature = XAdESSignature::load_from_file(signature_path)?;
+
         let file_path = file_path.as_ref();
-        let signature_path = signature_path.as_ref();
-
         let data = fs::read(file_path)?;
-
-        let xml_signature = fs::read_to_string(signature_path)?;
-        let xades_signature = XAdESSignature::deserialize(&xml_signature)?;
 
         self.verify(&data, &xades_signature)
     }
@@ -74,8 +71,7 @@ mod tests {
         let _ = fs::write(&file_path, "hello there");
 
         let xades_signature = signer.sign_file(&file_path).unwrap();
-        let xml_signature = xades_signature.serialize().unwrap();
-        fs::write(&signature_path, xml_signature).expect("Unable to write file");
+        xades_signature.save_to_file(&signature_path).unwrap();
 
         let result = verifier.verify_file(&file_path, &signature_path);
         assert!(result.unwrap());

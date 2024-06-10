@@ -100,11 +100,9 @@ mod tests {
         let _ = fs::write(&file_path, "hello there");
 
         let xades_signature = signer.sign_file(&file_path).unwrap();
-        let xml_signature = xades_signature.serialize().unwrap();
-        fs::write(&signature_path, xml_signature).expect("Unable to write file");
+        xades_signature.save_to_file(&signature_path).unwrap();
 
-        let deserialized_signature =
-            XAdESSignature::deserialize(&fs::read_to_string(&signature_path).unwrap()).unwrap();
+        let deserialized_signature = XAdESSignature::load_from_file(&signature_path).unwrap();
 
         let signature = "B2aBtPozDSKWlVXRZRWd3dGfY46yMD2XuT44De5lJ5lbiyezYDg9ulUddqY2pdNgVB9S3/QzIz46mR4oKKOaQZZFOBonZMjmJMSCLlGExgMDdSCpQFkWVMSPtjYbh2GXlFP9eMerAao80/RkFa0h5+m/S9sS8XdMfDrENOD/2hy9d81BCYd2uq+VYqUfwYzXyeZQ8BB7sC2C/NSdGTUP7wlycGadvMWA2wDre7Fw/vaiCg0D8rjDbsDFOS4XrZON6No5RyvPzJBkZwOdUA9VYGpJ/C2kC7NKRMFoMbIIvAYtTTgeQf9pTUupWCJIzZpI8Gdhl5s/lm6nKEw0BMq+rxEMmZNxkG1QkXexyg4UHS530HmylutqnQBPZWzUj4L2LwPfo3TqHCkp3/FUPot7zquStsuVYLTgLRDt3DwYhNexbfgIrDsLc3bYiAtONo40LlBmn/Uvm8wFU4XwIRn5HGpe64shYRfSCSDUfNrdcyCxGupmRyZ0aPLbauPTsaTTgY82iBkDy2Ld/0l9lEu3CbgFa48XW2TUxLwr1RanS204bCd8RluUlpMoTo+VlA2oCOHlfvmK9NsrfGdMEf39rpvc1BnW5cR+SwoFuOOiY725apBfsA0+PhYZygGayxWdKWCcBKCxEdHqkWztw1T3lollT9/7NfXusBFFGnH7Y2w=";
 

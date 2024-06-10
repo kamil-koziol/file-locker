@@ -37,7 +37,7 @@ impl Keypair {
         let result = Encryptor::encrypt(
             pin_hash,
             private_key.to_pkcs1_pem(LineEnding::default())?.as_bytes(),
-        );
+        )?;
 
         Ok(result)
     }
@@ -52,7 +52,7 @@ impl Keypair {
         let pin_hash = sha.finalize();
 
         let nonce = Encryptor::load_nonce(nonce);
-        let decrypted_private_key = Encryptor::decrypt(pin_hash, nonce, encrypted_private_key);
+        let decrypted_private_key = Encryptor::decrypt(pin_hash, nonce, encrypted_private_key)?;
 
         let pkey = str::from_utf8(decrypted_private_key.as_slice())?;
         let private_key = RsaPrivateKey::from_pkcs1_pem(pkey)?;
