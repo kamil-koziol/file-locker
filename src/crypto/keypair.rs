@@ -91,6 +91,29 @@ impl Keypair {
         )
     }
 
+    pub fn write_to_files_u(
+        &self,
+        private_key_path: &str,
+        public_key_path: &str,
+    ) -> Result<(), Box<dyn Error>> {
+        self.private_key
+            .write_pkcs1_pem_file(private_key_path, LineEnding::default())?;
+        self.public_key
+            .write_pkcs1_pem_file(public_key_path, LineEnding::default())?;
+
+        Ok(())
+    }
+
+    pub fn write_to_dir_u(&self, dir: &str) -> Result<(), Box<dyn Error>> {
+        let private_key_path = Path::new(dir).join(PRIVATE_KEY_NAME);
+        let public_key_path = Path::new(dir).join(PUBLIC_KEY_NAME);
+
+        self.write_to_files_u(
+            private_key_path.to_str().unwrap(),
+            public_key_path.to_str().unwrap(),
+        )
+    }
+
     pub fn load_from_dir(dir: &str, pin: &str) -> Result<Keypair, Box<dyn Error>> {
         let private_key_path = Path::new(dir).join(PRIVATE_KEY_NAME);
         let public_key_path = Path::new(dir).join(PUBLIC_KEY_NAME);
