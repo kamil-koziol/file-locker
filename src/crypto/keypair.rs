@@ -16,6 +16,7 @@ use super::encryptor::EncryptResult;
 use std::str;
 
 const NONCE_ANNOTATION: &str = ".nonce";
+pub const KEY_SIZE: usize = 4096;
 
 pub struct Keypair {
     pub private_key: RsaPrivateKey,
@@ -137,7 +138,7 @@ mod tests {
 
     #[test]
     fn test_save_keypair_to_files() {
-        let keypair = Keypair::generate(4096);
+        let keypair = Keypair::generate(KEY_SIZE);
 
         let private_key_path = "keys/private.pem";
         let public_key_path = "keys/public.pem";
@@ -153,7 +154,7 @@ mod tests {
 
     #[test]
     fn test_loading_keys() {
-        let keypair = Keypair::generate(4096);
+        let keypair = Keypair::generate(KEY_SIZE);
 
         let pin = "1234";
         let private_key_path = "keys/private.pem";

@@ -4,7 +4,7 @@ use egui::Color32;
 use rsa::Pkcs1v15Encrypt;
 use serde::{Deserialize, Serialize};
 
-use crate::crypto::{Keypair, Signer, Verifier};
+use crate::crypto::{keypair::KEY_SIZE, Keypair, Signer, Verifier};
 use std::{fs, path::Path};
 
 use sysinfo::Disks;
@@ -119,7 +119,7 @@ impl TemplateApp {
                     fs::create_dir(&search_path).unwrap();
 
                     let filelocker_path = search_path.to_str().unwrap();
-                    let keypair = Keypair::generate(4096);
+                    let keypair = Keypair::generate(KEY_SIZE);
                     keypair
                         .write_to_dir(filelocker_path, &self.pin.clone().unwrap())
                         .unwrap();
